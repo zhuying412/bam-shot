@@ -46,7 +46,7 @@ def check_samtools():
 
 
 def check_or_create_bai(bam: str):
-    bai = f'{os.path.splitext(bam)[0]}.bai'
+    bai = f'{bam}.bai'
     if not os.path.exists(bai):
         cmd = f"samtools index {bai}"
         if os.system(cmd) != 0:
