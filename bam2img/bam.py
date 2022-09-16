@@ -1,6 +1,5 @@
-import enum
 import os
-
+import re
 from collections import namedtuple
 from pysam import FastaFile
 
@@ -46,9 +45,9 @@ def check_samtools():
 
 
 def check_or_create_bai(bam: str):
-    bai = f'{bam}.bai'
+    bai = re.sub(r'bam$', 'bai', bam)
     if not os.path.exists(bai):
-        cmd = f"samtools index {bai}"
+        cmd = f"samtools index {bam}"
         if os.system(cmd) != 0:
             raise Exception(f"Error: run '{cmd}' failed")
 
@@ -60,7 +59,7 @@ def tview_bam(bam: str, ref: str, chrom: str, start: int, end: int, extend: int,
     end += extend
     width = end - start + 1
     cmd = f'export COLUMNS={width} && samtools tview -d T -p {chrom}:{start} {bam}'
-    lines = [l.rstrip('\n') for l in os.popen(cmd).readlines()]
+    lines = [line.rstrip('\n') for line in os.popen(cmd).readlines()]
     if depth:
         lines = lines[0:depth + 3]
     cigars = create_cigars(lines[1])

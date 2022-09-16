@@ -1,8 +1,26 @@
-import io
-import os
-
+from enum import Enum
 from matplotlib import pyplot as plt
 from .bam import tview_bam
+
+
+class BaseColor(Enum):
+    A = 'C2'
+    T = 'C3'
+    G = 'C4'
+    C = 'C0'
+    D = 'C7'
+
+    @classmethod
+    def get(cls, base: str) -> str:
+        if base == 'A':
+            return str(cls.A)
+        if base == 'T':
+            return str(cls.T)
+        if base == 'G':
+            return str(cls.G)
+        if base == 'C':
+            return str(cls.C)
+        return str(cls.D)
 
 
 class Image:
@@ -71,6 +89,6 @@ class Image:
         plt.close()
 
 
-def plotBAM(img, bam: str, ref: str, chrom: str, start: int, end: int, extend: int, depth: int = None, title: str = "", dpi: int = 200, format: str = 'png'):
+def bam2img(img, bam: str, ref: str, chrom: str, start: int, end: int, extend: int, depth: int = None, title: str = "", dpi: int = 200, format: str = 'png'):
     reference, consensus, reads = tview_bam(bam=bam, ref=ref, chrom=chrom, start=start, end=end, extend=extend, depth=depth)
     Image(title=title, reference=reference, consensus=consensus, reads=reads, extend=extend).plot(img=img, dpi=dpi, format=format)
