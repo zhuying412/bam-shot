@@ -4,37 +4,6 @@ from collections import namedtuple
 from pysam import FastaFile
 
 BamTview = namedtuple('BamTview', ['reference', 'consensus', 'reads'])
-Cigar = namedtuple('Cigar', ['type', 'length'])
-
-
-def create_cigars(seq: str) -> list[Cigar]:
-    cigars = list()
-    for base in seq:
-        if base == '*':
-            cigar = Cigar(type='I', length=0)
-            if cigars and cigars[-1].type == 'I':
-                cigar = cigars.pop()
-            cigars.append(Cigar(type='I', length=cigar.length + 1))
-        else:
-            cigar = Cigar(type='M', length=0)
-            if cigars and cigars[-1].type == 'M':
-                cigar = cigars.pop()
-            cigars.append(Cigar(type='M', length=cigar.length + 1))
-    return cigars
-
-
-def read_reference(ref: str, chrom: str, start: int, end: int, cigars: list[Cigar]) -> str:
-    seq = FastaFile(ref).fetch(reference=chrom, start=start - 1, end=end).upper()
-    reference = ""
-    i = 0
-    for cigar in cigars:
-        for j in range(cigar.length):
-            base = '-'
-            if cigar.type == 'M':
-                base = seq[i]
-                i += 1
-            reference += base
-    return reference
 
 
 def check_samtools():
@@ -52,7 +21,60 @@ def check_or_create_bai(bam: str):
             raise Exception(f"Error: run '{cmd}' failed")
 
 
-def tview_bam(bam: str, ref: str, chrom: str, start: int, end: int, extend: int, depth: int = None) -> BamTview:
+def create_cigars(seq: str) -> list[str]:
+    cigars = ['M'] * len(seq)
+    for i in range(len(seq)):
+        if seq[i] == '*':
+            cigars[i] = 'I'
+    return cigars
+
+
+def create_reference(ref: str, chrom: str, start: int, end: int, cigars: list[str], ref_with_ins: bool) -> list[str]:
+    seq = FastaFile(ref).fetch(reference=chrom, start=start - 1, end=end).upper()
+    bases = list()
+    i = 0
+    for cigar in cigars:
+        if cigar == "I":
+            if ref_with_ins:
+                bases.append('-')
+        else:
+            bases.append(seq[i])
+            i += 1
+    return bases
+
+
+def create_consensus(seq: str, cigars: list[str], ref_with_ins: bool) -> list[str]:
+    bases = list()
+    for i in range(len(cigars)):
+        if cigars[i] == "I":
+            if ref_with_ins:
+                bases.append(seq[i])
+        else:
+            bases.append(seq[i])
+    return bases
+
+
+def create_reads(lines: list[str], cigars: list[str], ref_with_ins: bool) -> list[list[str]]:
+    reads = list()
+    for line in lines:
+        line = line.upper()
+        bases = list()
+        for i in range(len(cigars)):
+            base = '-' if line[i] == '*' else line[i]
+            if cigars[i] == 'I':
+                if ref_with_ins:
+                    bases.append(base)
+                else:
+                    if base not in [' ', '-']:
+                        if not bases[-1].endswith('I'):
+                            bases[-1] += 'I'
+            else:
+                bases.append(base)
+        reads.append(bases)
+    return reads
+
+
+def tview_bam(bam: str, ref: str, chrom: str, start: int, end: int, extend: int, depth: int = None, ref_with_ins: bool = True) -> BamTview:
     check_samtools()
     check_or_create_bai(bam)
     start -= extend
@@ -63,5 +85,7 @@ def tview_bam(bam: str, ref: str, chrom: str, start: int, end: int, extend: int,
     if depth:
         lines = lines[0:depth + 3]
     cigars = create_cigars(lines[1])
-    reference = read_reference(ref=ref, chrom=chrom, start=start, end=end, cigars=cigars)
-    return BamTview(reference=reference, consensus=lines[2], reads=lines[3:])
+    reference = create_reference(ref=ref, chrom=chrom, start=start, end=end, cigars=cigars, ref_with_ins=ref_with_ins)
+    consensus = create_consensus(seq=lines[2], cigars=cigars, ref_with_ins=ref_with_ins)
+    reads = create_reads(lines[3:], cigars=cigars, ref_with_ins=ref_with_ins)
+    return BamTview(reference=reference, consensus=consensus, reads=reads)
