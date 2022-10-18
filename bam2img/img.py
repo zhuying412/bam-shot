@@ -91,7 +91,7 @@ class Image:
 
     def plot_arrow(self):
         x = self.extend + 1
-        x += len(re.findall('-', ), self.reference[:self.extend])
+        x += len(re.findall('-', self.reference[:self.extend]))
         plt.arrow(x, -4, 0, 1, head_width=0.2, lw=2, color='red', length_includes_head=True)
 
     def plot(self, img, dpi: int, format: str):
