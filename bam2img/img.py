@@ -1,6 +1,5 @@
 from enum import Enum
 import io
-import math
 from typing import Union
 from matplotlib import pyplot as plt
 
@@ -33,7 +32,7 @@ class ImageOption(Enum):
         return option
 
 
-def plot_bam(reference: list[str], consensus: list[str], reads: list[list[str]], extend: int, img: Union[str, io.BytesIO], title: str = "", dpi: int = 200):
+def plot_bam(reference: list[str], consensus: list[str], reads: list[list[str]], extend: int, img: Union[str, io.BytesIO], title: str, dpi: int):
     length = len(reference)
     depth = len(reads)
     reads = reads[::-1]

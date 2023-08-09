@@ -74,7 +74,7 @@ def create_reads(lines: list[str], cigars: list[str], ref_with_ins: bool) -> lis
     return reads
 
 
-def tview_bam(bam: str, ref: str, chrom: str, start: int, end: int, extend: int, depth: int = None, ref_with_ins: bool = True) -> tuple[list[str], list[str], list[list[str]]]:
+def tview_bam(bam: str, ref: str, chrom: str, start: int, end: int, extend: int, depth: int, ref_with_ins: bool) -> tuple[list[str], list[str], list[list[str]]]:
     check_samtools()
     check_or_create_bai(bam)
     start -= extend
