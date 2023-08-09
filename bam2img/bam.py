@@ -74,7 +74,7 @@ def create_reads(lines: list[str], cigars: list[str], ref_with_ins: bool) -> lis
     return reads
 
 
-def tview_bam(bam: str, ref: str, chrom: str, start: int, end: int, extend: int, depth: int = None, ref_with_ins: bool = True) -> BamTview:
+def tview_bam(bam: str, ref: str, chrom: str, start: int, end: int, extend: int, depth: int = None, ref_with_ins: bool = True) -> tuple[list[str], list[str], list[list[str]]]:
     check_samtools()
     check_or_create_bai(bam)
     start -= extend
@@ -88,4 +88,4 @@ def tview_bam(bam: str, ref: str, chrom: str, start: int, end: int, extend: int,
     reference = create_reference(ref=ref, chrom=chrom, start=start, end=end, cigars=cigars, ref_with_ins=ref_with_ins)
     consensus = create_consensus(seq=lines[2], cigars=cigars, ref_with_ins=ref_with_ins)
     reads = create_reads(lines[3:], cigars=cigars, ref_with_ins=ref_with_ins)
-    return BamTview(reference=reference, consensus=consensus, reads=reads)
+    return reference, consensus, reads
