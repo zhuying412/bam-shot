@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="bam2img",
-    version="0.0.6",
+    version="0.1.0",
     author="Ying Zhu",
     author_email="win19890412@163.com",
     description="A tools of bam to image",
@@ -23,5 +23,7 @@ setuptools.setup(
     },
     install_requires=[
         'pyfaidx',
+        'pydantic'
+        'matplotlib'
     ],
 )
