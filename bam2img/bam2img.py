@@ -64,10 +64,10 @@ class Bam2Img(BaseModel):
     bam_file: Path
     reference_file: Path
     snv: SNV
-    extend: int
-    depth: Optional[int] = None
+    extend: int = 50
+    depth: Optional[int] = 100
     ref_with_ins: bool = False
-    dpi: int = 300
+    dpi: int = 200
 
     class Config:
         arbitrary_types_allowed = True
