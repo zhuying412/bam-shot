@@ -23,7 +23,7 @@ setuptools.setup(
     },
     install_requires=[
         'pyfaidx',
-        'pydantic'
+        'pydantic',
         'matplotlib'
     ],
 )
